@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALORIA - Serveur Minecraft Moddé</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121214;
+            color: #e1e1e6;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Onglet Minimap Style Menu Minecraft (Haut Droite) */
+        .minimap-tab {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            background-color: #2e2e2e;
+            border: 3px solid #1c1c1c;
+            border-top-color: #555555;
+            border-left-color: #555555;
+            padding: 12px 22px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 0 #000000;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+
+        .minimap-tab:hover {
+            background-color: #3c3c3c;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #000000;
+        }
+
+        .minimap-compass {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .minimap-text {
+            color: #ff6600;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px #3f1a00;
+        }
+
+        /* Effet de particules de lave */
+        .lava-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            pointer-events: none;
+            z-index: 9999;
+            image-rendering: pixelated;
+            animation: fallAndFade 0.8s linear forwards;
+        }
+
+        @keyframes fallAndFade {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(30px) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        /* Header / Banner */
+        .hero {
+            position: relative;
+            background: linear-gradient(rgba(18, 18, 20, 0.75), #121214), url('https://i.pinimg.com/736x/bc/9a/11/bc9a1119131756904b7bc39f26a1074e.jpg') no-repeat center center/cover;
+            text-align: center;
+            padding: 80px 20px 80px 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #ff6600;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255, 102, 0, 0.4);
+            letter-spacing: 2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #a8a8b3;
+            max-width: 600px;
+            margin: 20px auto 0 auto;
+        }
+
+        /* Discord Banner Link */
+        .discord-banner {
+            display: block;
+            background-color: #5865F2;
+            color: #ffffff;
+            text-decoration: none;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
+            border-bottom: 3px solid #404eed;
+        }
+
+        .discord-banner:hover {
+            background-color: #4752c4;
+            transform: translateY(-2px);
+        }
+
+        .discord-banner span {
+            text-decoration: underline;
+            margin-left: 5px;
+            color: #ffaa00;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Sections */
+        .section {
+            padding: 60px 0;
+            border-bottom: 1px solid #29292e;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #ff6600;
+            margin-top: 0;
+            margin-bottom: 30px;
+            border-left: 4px solid #ff6600;
+            padding-left: 15px;
+        }
+
+        /* Grid features */
+        .features-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 20px;
+            margin: 0 -20px;
+        }
+
+        .feature-card {
+            background-color: #1e1e24;
+            border: 1px solid #29292e;
+            border-radius: 8px;
+            padding: 25px;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .feature-card h3 {
+            color: #ffffff;
+            margin-top: 0;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #a8a8b3;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Staff Section */
+        .staff-card {
+            background-color: #1e1e24;
+            border: 1px solid #29292e;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            width: 22%;
+            display: inline-block;
+            box-sizing: border-box;
+            margin: 10px;
+        }
+
+        .staff-container {
+            text-align: center;
+        }
+
+        .avatar {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .staff-name {
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .role-owner {
+            color: #ff5555;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            color: #faa33b;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #737380;
+            font-size: 0.9rem;
+            background-color: #0e0e10;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Onglet fixe Minimap -->
+    <a href="https://jungle.mystrator.com/s/90f6f545-89cf-46ca-9084-fd5d0fedd1cb/#overworld:-95:7:-229:445:0:0:0:1:flat" target="_blank" class="minimap-tab" title="Ouvrir la carte du serveur">
+        <span class="minimap-compass">🧭</span>
+        <span class="minimap-text">Minimap</span>
+    </a>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>VALORIA</h1>
+        <p>Une aventure où chaque chemin raconte une histoire… Découvrez un serveur Minecraft moddé sous Fabric 1.20.1 pensé pour offrir une expérience immersive, conviviale et riche en découvertes.</p>
+    </div>
+
+    <!-- Discord Banner -->
+    <a href="https://discord.gg/THTJBnVm2K" target="_blank" class="discord-banner">
+        Pour nous rejoindre et suivre l'ouverture de près, rejoignez notre communauté ! <span>Cliquez ici pour ouvrir Discord</span>
+    </a>
+
+    <div class="container">
+        
+        <!-- À propos / Principes -->
+        <div class="section">
+            <h2 class="section-title">Découvrez l'univers de VALORIA</h2>
+            <p>Que vous soyez un bâtisseur passionné, un explorateur intrepide, un fermier accompli ou simplement à la recherche d'une nouvelle aventure, VALORIA vous ouvre ses portes.</p>
+            
+            <table class="features-table">
+                <tr>
+                    <td class="feature-card">
+                        <h3>Explorez un monde vivant</h3>
+                        <p>Découvrez une génération du monde entièrement revisitée avec de nouveaux biomes, des structures inédites, des villages plus vivants et d'innombrables lieux à explorer. Chaque voyage réserve son lot de surprises, de trésors et de défis.</p>
+                    </td>
+                    <td class="feature-card">
+                        <h3>Construisez votre propre histoire</h3>
+                        <p>Créez la maison de vos rêves, bâtissez un village prospère ou lancez-vous dans des projets monumentaux grâce à une immense collection de blocs décoratifs, de meubles et d'éléments architecturaux.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="feature-card">
+                        <h3>Développez votre domaine</h3>
+                        <p>L'agriculture et la cuisine occupent une place importante. Cultivez de nouvelles variétés de plantes, préparez de nombreux plats, élevez vos animaux et transformez votre simple ferme en un véritable domaine.</p>
+                    </td>
+                    <td class="feature-card">
+                        <h3>L'aventure vous attend</h3>
+                        <p>Explorez des donjons mystérieux, découvrez de nouvelles créatures, relevez des défis toujours plus ambitieux et partez à la recherche de trésors cachés. Chaque expédition peut devenir une véritable aventure.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="feature-card">
+                        <h3>Une expérience fluide</h3>
+                        <p>Le modpack a été soigneusement optimisé afin d'offrir d'excellentes performances tout en proposant un contenu riche et varié. Profitez d'une expérience agréable aussi bien en solo qu'en multijoueur.</p>
+                    </td>
+                    <td class="feature-card">
+                        <h3>Une communauté avant tout</h3>
+                        <p>Sur VALORIA, nous souhaitons créer un serveur accueillant où chacun peut évoluer à son rythme. Cooperez avec les autres joueurs. Construisez ensemble. Devellopez votre propre territoire.</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- L'équipe / Crédits -->
+        <div class="section">
+            <h2 class="section-title">L'Équipe de VALORIA</h2>
+            <div class="staff-container">
+                
+                <div class="staff-card">
+                    <img class="avatar" src="https://mc-heads.net/avatar/kyo003/64" alt="kyo003">
+                    <div class="staff-name">kyo003</div>
+                    <div class="role-owner">Owner</div>
+                </div>
+
+                <div class="staff-card">
+                    <img class="avatar" src="https://mc-heads.net/avatar/THS_38/64" alt="THS_38">
+                    <div class="staff-name">THS_38</div>
+                    <div class="role-owner">Owner</div>
+                </div>
+
+                <div class="staff-card">
+                    <img class="avatar" src="https://mc-heads.net/avatar/Blue_Raptor8055/64" alt="Blue_Raptor8055">
+                    <div class="staff-name">Blue_Raptor8055</div>
+                    <div class="role-admin">Admin</div>
+                </div>
+
+                <div class="staff-card">
+                    <img class="avatar" src="https://mc-heads.net/avatar/GABBIE_467/64" alt="GABBIE_467">
+                    <div class="staff-name">GABBIE_467</div>
+                    <div class="role-admin">Admin</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer avec crédits textuels -->
+    <footer>
+        <p>Site internet créé par Gabbie, Ewnnss et Asier.</p>
+    </footer>
+
+    <!-- Script Effet de Lave Minecraft -->
+    <script>
+        const colors = ['#ff3300', '#ff6600', '#ff9900', '#ffcc00'];
+        
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.25) return; 
+
+            const particle = document.createElement('div');
+            particle.classList.add('lava-particle');
+            
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            particle.style.left = (e.pageX + (Math.random() * 12 - 6)) + 'px';
+            particle.style.top = (e.pageY + (Math.random() * 12 - 6)) + 'px';
+            
+            const size = Math.floor(Math.random() * 5) + 4;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 800);
+        });
+    </script>
+
+</body>
+</html>
